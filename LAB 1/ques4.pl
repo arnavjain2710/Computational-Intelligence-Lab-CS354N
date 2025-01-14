@@ -8,5 +8,9 @@ soldier(dunbar,lieutenant).
 soldier(flume, captain). 
 soldier(danby, major).
 
+samerank(X , Y) :- soldier(X , R) , soldier(Y,R).
+
 % query - 
-% soldier(aardvark, _), soldier(flume, _).
+% samerank(aardvark , flume ).
+
+
