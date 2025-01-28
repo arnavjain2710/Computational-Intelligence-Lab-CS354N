@@ -1,23 +1,40 @@
-div(N,F,M,R,K) :- S is N // F, N =:= S * F, !,   
-   K1 is K + 1, div(S,F,M,R,K1).
-div(N,_,M,N,M).
+% Define state transitions
+move(walk(To), state(Current, floor, Box, Has), state(To, floor, Box, Has)) :- dif(Current, To), member(To, [door, window, middle]).
+move(push_box(To), state(Pos, floor, Pos, Has), state(To, floor, To, Has)) :- dif(Pos, To), member(To, [door, window, middle]).
+move(climb, state(Pos, floor, Pos, Has), state(Pos, on_box, Pos, Has)).
+move(grasp, state(middle, on_box, middle, no), state(middle, on_box, middle, yes)).
 
-division(N,F,M,R) :- div(N,F,M,R,0), M > 0.
+% Initial and goal states
+initial_state(state(door, floor, window, no)).
+goal_state(state(_, _, _, yes)).
 
-next_factor(_,2,3) :- !.
-next_factor(N,F,NF) :- F * F < N, !, NF is F + 2.
-next_factor(N,_,N).
+% Iterative deepening search
+solve(Actions) :- between(1, 10, Limit), length(Actions, Limit), initial_state(Start), path(Start, Actions, [Start]).
 
-prime_factors(N,L) :- N > 0, prime_factors(N,L,2).
+path(State, [], _) :- goal_state(State).
 
-prime_factors(1,[],_) :- !.
-prime_factors(N,[[F,M]|L],F) :- division(N,F,M,R), !, 
-   next_factor(R,F,NF), prime_factors(R,L,NF).
-prime_factors(N,L,F) :- !,                          
-   next_factor(N,F,NF), prime_factors(N,L,NF).
+path(State1, [Action|Actions], Visited) :- move(Action, State1, State2), \+ member(State2, Visited), path(State2, Actions, [State2|Visited]).
 
-phi(N,Phi) :- prime_factors(N,L), totient(L,Phi).
+% Solution formatting
+print_solution([]) :-  format('The monkey has grasped the banana!~n').
+print_solution([A|As]) :-  format('Action: ~w~n', [A]), print_solution(As).
 
-totient([],1).
-totient([[F,1]|L],Phi) :- !, totient(L,Phi1), Phi is Phi1 * (F - 1).
-totient([[F,M]|L],Phi) :- M > 1, M1 is M - 1, totient([[F,M1]|L],Phi1), Phi is Phi1 * F.
+monkey_banana :- solve(Actions), print_solution(Actions), !.
+monkey_banana :-  format('No solution found.~n').
+
+% query:
+% monkey_banana.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

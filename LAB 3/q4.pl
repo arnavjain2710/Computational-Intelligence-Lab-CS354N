@@ -1,8 +1,42 @@
-move(1, X, _, Z, [[X, Z]]).
-move(N, X, Y, Z, P) :-
-    M is (N - 1),
-    move(M, X, Z, Y, P1),
-    move(1, X, Y, Z, P2),
-    move(M, Y, X, Z, P3),
-    append(P1, P2, Q),
-    append(Q, P3, P).
+% Check if the given board is a valid solution
+safe([]).
+safe([X|Xs]) :- safe(Xs), no_attack(X, Xs, 1).
+
+% Ensuring that no two queens are attacking each other
+no_attack(_, [], _).
+no_attack(X, [Y|Ys], N) :- 
+    X =\= Y,                 % Not in the same row
+    X =\= Y + N,             % Not in the same diagonal ( \ )
+    X =\= Y - N,             % Not in the same diagonal ( / )
+    N1 is N + 1,
+    no_attack(X, Ys, N1).
+
+% Generate a permutation of [1..N] and check if it is a valid solution
+queens(N, Solution) :- 
+    numlist(1, N, List),      % Generate [1,2,...,N]
+    permutation(List, Solution), 
+    safe(Solution).
+
+solve_queens(Solution) :- 
+    queens(8, Solution).
+
+
+% query:
+% solve_queens(Solution).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
