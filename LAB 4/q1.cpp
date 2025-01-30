@@ -2,8 +2,9 @@
 #include <vector>
 #include <cstdlib> 
 #include <ctime>   
+#include <fstream>
+#include <sstream>
 using namespace std;
-
 class MPNeuron {
 public:
     MPNeuron(int numInputs, int threshold) {
@@ -41,30 +42,57 @@ private:
     int threshold;
 };
 
-int main() {
-    srand(time(0));
-
-    int numInputs, threshold;
-    
-    cout << "Enter the number of input nodes: ";
-    cin >> numInputs;
-    cout << "Enter the threshold: ";
-    cin >> threshold;
-    vector<int> inputs(numInputs);
-    cout << "Enter the " << numInputs << " inputs (0 or 1): ";
-    for (int i = 0; i < numInputs; ++i) {
-        cin >> inputs[i];
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " <filename>" << endl;
+        return 1;
     }
 
-    // Create the MPNeuron object with random weights and the provided threshold
+    string filename = argv[1];
+    ifstream file(filename);
+    if (!file) {
+        cerr << "Error opening file!" << endl;
+        return 1;
+    }
+
+    int numIterations;
+    file >> numIterations; // number of iterations
+    file.ignore(); 
+
+    for (int i = 0; i < numIterations; ++i) {
+        cout<<"Iteration "<<i+1<<endl;
+        int numInputs, threshold;
+        file >> numInputs;  // number of inputs
+        file.ignore();  
+        file >> threshold;  // threshold 
+        file.ignore(); 
+
+        vector<int> inputs(numInputs);
+        for (int j = 0; j < numInputs; ++j) {
+            file >> inputs[j];  // inputs
+        }
+
     MPNeuron neuron(numInputs, threshold);
     neuron.displayWeights();
-    
+
     int output = neuron.computeOutput(inputs);
-    cout << "Net output: " << output << endl;
+    cout << "For input ";
+    for (int j = 0; j < numInputs; ++j) {
+            cout << inputs[j] << " ";
+        }
+    cout << ", the Net output is: " << output << endl;
+    cout<<endl;
+    }
 
     return 0;
 }
+
+
+
+
+
+
+
 
 
 

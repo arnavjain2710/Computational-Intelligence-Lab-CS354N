@@ -1,12 +1,14 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <sstream>
 using namespace std;
 
 class MPNeuron {
 public:
     MPNeuron(int numInputs) {
-        weights.resize(numInputs, 1);  // Set all weights to 1
-        threshold = numInputs; // NAND gate requires all 1s to output 0
+        weights.resize(numInputs, -1);  // Set all weights to -1
+        threshold = -1*numInputs + 1; // NAND gate requires all 1s to output 0
     }
 
     int computeOutput(const vector<int>& inputs) {
@@ -20,7 +22,7 @@ public:
             sum += inputs[i] * weights[i]; 
         }
         
-        return sum >= threshold ? 0 : 1; 
+        return sum >= threshold ? 1 : 0; 
     }
 
 private:
@@ -28,22 +30,47 @@ private:
     int threshold;
 };
 
-int main() {
-    int numInputs;
-    cout << "Enter the number of input nodes (e.g., 3): ";
-    cin >> numInputs;
-
-    cout << "NAND Gate Implementation" << endl;
-    vector<int> inputs(numInputs);
-    cout << "Enter " << numInputs << " inputs (0 or 1): ";
-    for (int i = 0; i < numInputs; ++i) {
-        cin >> inputs[i];
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " <filename>" << endl;
+        return 1;
     }
 
-    MPNeuron neuron(numInputs);
-    int output = neuron.computeOutput(inputs);
+    string filename = argv[1];
+    ifstream file(filename);
+    if (!file) {
+        cerr << "Error opening file!" << endl;
+        return 1;
+    }
 
-    cout << "Output: " << output << endl;
+    int numIterations;
+    file >> numIterations; // Read the number of iterations
+    file.ignore(); 
+
+    for (int i = 0; i < numIterations; ++i) {
+        cout<<"Iteration "<<i+1<<endl;
+        int numInputs;
+        file >> numInputs;  // Read the number of inputs for this iteration
+        file.ignore();  
+
+        vector<int> inputs(numInputs);
+        for (int j = 0; j < numInputs; ++j) {
+            file >> inputs[j];  // inputs
+        }
+
+        MPNeuron neuron(numInputs);
+        int output = neuron.computeOutput(inputs);
+
+        cout << "For input ";
+        for (int j = 0; j < numInputs; ++j) {
+            cout << inputs[j] << " ";
+        }
+        cout << ", the output of NAND gate is: " << output << endl;
+        cout<< endl;
+    }
 
     return 0;
 }
+
+
+
